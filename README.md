@@ -22,9 +22,9 @@ Embodied navigation requires agents to interpret multimodal goals, reason over 3
 
 Image2Sim is designed to support three main workflows:
 
-1. **Neural scene simulation** from posed RGB-D images, panoramic captures, or reconstructed image/video data.
-2. **Automated embodied data generation** with executable navigation actions and diverse language instructions.
-3. **Navigation model training**, including behavior cloning and online DAgger training.
+1. **Neural scene simulation** reconstructed from pinhole/panoramic images or videos.
+2. **Automated navigation data generation** with realistic visual observations, executable navigation actions and diverse language instructions.
+3. **Navigation model training** with large-scale imitation learning and online DAgger.
 
 ## Table of Contents
 
