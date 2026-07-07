@@ -456,7 +456,7 @@ data/scene_datasets/
 | Data        | Target path                 | Link                                                                                                                  |
 | ----------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | MP3D scenes | `data/scene_datasets/mp3d/` | [Official Matterport3D project page](https://niessner.github.io/Matterport)                                           |
-| R2R-CE      | `data/datasets/r2r/`        | [r2r-ce](https://drive.google.com/file/d/18DCrNcpxESnps1IbXVjXSbGLDzcSOqzD/view), rename `R2R_VLNCE_v1-3` to `r2r`    |
+| R2R-CE      | `data/datasets/r2r/`        | [r2r-ce](https://drive.google.com/file/d/1T9SjqZWyR2PCLSXYkFckfDeIs6Un0Rjm/view), rename `R2R_VLNCE_v1-3` to `r2r`    |
 | RxR-CE      | `data/datasets/rxr/`        | [rxr-ce](https://drive.google.com/file/d/145xzLjxBaNTbVgBfQ8e9EsBAV8W-SM0t/view), rename `RxR_VLNCE_v0` to `rxr`      |
 | REVERIE-CE  | `data/datasets/reverie/`    | [reverie-ce]( https://huggingface.co/datasets/MrZihanWang/Image2Sim-V1/tree/main/data/datasets), extract to `reverie` |
 
