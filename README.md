@@ -1,16 +1,522 @@
-# Image2Sim
-Official implementation of "Image2Sim: Scaling Embodied Navigation via Generative Neural Simulator"
+# Image2Sim: Scaling Embodied Navigation via Generative Neural Simulator
+
+<p align="center">
+  <a href="https://github.com/MrZihan/Image2Sim">Code</a> |
+  <a href="https://huggingface.co/datasets/MrZihanWang/Image2Sim-V1">Data & Checkpoints</a> |
+  <a href="#citation">Citation</a> |
+  <a href="#license">License</a>
+</p>
+
+**Authors:** Zihan Wang, Seungjun Lee, Yinghao Xu, Gim Hee Lee 
+
+## Overview
+
+Embodied navigation requires agents to interpret multimodal goals, reason over 3D space, and execute reliable actions in complex real-world environments. A major bottleneck is the lack of scalable, high-fidelity, and interactive simulation environments that can support large-scale training while preserving realistic visual observations and physical motion.
+
+**Image2Sim** is a real-time neural simulation framework that builds interactive embodied navigation environments from posed RGB-D image sequences. The core idea is to decouple **3D spatial anchoring** from **photorealistic observation synthesis**: the simulator maintains an explicit 3D feature-Gaussian scene representation for geometry-aware navigation and uses a neural renderer with pixel-flow refinement to synthesize high-quality panoramic RGB-D observations.
+
+Image2Sim is designed to support three main workflows:
+
+1. **Neural scene simulation** from posed RGB-D images, panoramic captures, or reconstructed image/video data.
+2. **Automated embodied data generation** with executable navigation actions and diverse language instructions.
+3. **Navigation model training**, including behavior cloning and online DAgger training.
+   
+   
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Data and Checkpoints](#data-and-checkpoints)
+- [Quick Start](#quick-start)
+- [Training and Evaluation](#training-and-evaluation)
+- [Data Process Tools](#data-conversion-tools)
+- [Importing Custom Image or Video Data](#importing-custom-image-or-video-data)
+- [Habitat Evaluation Setup](#habitat-evaluation-setup)
+- [Expected Directory Structure](#expected-directory-structure)
+- [Citation](#citation)
+- [License](#license)
+
+## Installation
+
+### 1. Requirements
+
+Before installing Image2Sim, make sure your system has:
+
+- A CUDA-enabled GPU.
+- CUDA Toolkit with a working `nvcc` compiler.
+- PyTorch installed with the CUDA version matching your local environment.
+
+You can verify the CUDA compiler with:
+
+```bash
+nvcc --version
+```
+
+### 2. Clone the repository
+
+```bash
+git clone https://github.com/MrZihan/Image2Sim.git
+cd Image2Sim
+```
+
+### 3. Install the panoramic feature Gaussian splatting renderer
+
+Image2Sim uses a modified feature Gaussian splatting rasterizer for panoramic rendering and training.
+
+```bash
+cd diff-gaussian-pano-rasterization-feature
+pip install .
+cd ..
+```
+
+### 4. Install `torch_kdtree`
+
+`torch_kdtree` is used for efficient point-cloud and voxel processing.
+
+```bash
+mkdir -p external
+cd external
+git clone https://github.com/thomgrand/torch_kdtree.git
+cd torch_kdtree
+git submodule update --init --recursive
+pip install .
+cd ../..
+```
+
+### 5. Install Python dependencies
+
+```bash
+pip install transformers==4.57.6
+pip install open3d huggingface_hub
+```
+
+## 
+
+## Data and Checkpoints
+
+### Image2Sim datasets and pretrained neural renderer
+
+Download the released Image2Sim data and pretrained models from:
+
+```text
+https://huggingface.co/datasets/MrZihanWang/Image2Sim-V1
+```
+
+The neural renderer checkpoints should be placed under:
+
+```text
+pretrained_models/
+```
+
+After downloading the dataset, unzip all `.zip` files in the corresponding directories.
+
+### Qwen3-VL models
+
+Image2Sim uses Qwen3-VL models for navigation model initialization and instruction generation.
+
+```bash
+pip install -U huggingface_hub
+hf auth login
+
+# For Image2Nav initialization
+hf download Qwen/Qwen3-VL-4B-Instruct \
+  --local-dir pretrained_models/models--Qwen--Qwen3-VL-4B-Instruct
+
+# For instruction generation
+hf download Qwen/Qwen3-VL-32B-Instruct \
+  --local-dir pretrained_models/models--Qwen--Qwen3-VL-32B-Instruct
+```
+
+### Other third-party scene datasets
+
+Download third-party scene datasets separately and place them under:
+
+```text
+data/scene_datasets/
+```
+
+| Dataset      | Usage                                             | Link                                           |
+| ------------ | ------------------------------------------------- | ---------------------------------------------- |
+| RealSee3D    | Large-scale indoor scenes and RGB-D/panorama data | https://github.com/realsee-developer/RealSee3D |
+| Structured3D | Synthetic structured indoor scenes                | https://github.com/bertjiazheng/Structured3D   |
+| ARKitScenes  | Optional room-grounding navigation data           | https://github.com/apple/ARKitScenes           |
+
+Make sure the dataset paths are correctly configured in:
+
+```text
+scripts/dataset_config.json
+```
+
+## Quick Start
+
+The minimal Image2Sim simulator interface requires the following files or directories to be available in your project path:
+
+```text
+dinov3/
+image2sim.py
+data_tools.py
+pretrained_models/
+```
+
+The example below loads a pretrained simulator, builds feature Gaussians for one HM3D scene, imports navigable voxels，render observation and control the agent.
+
+```python
+import glob
+import json
+import os
+from types import SimpleNamespace
+import open3d as o3d
+import data_tools
+import image2sim
+import cv2
+import numpy as np
+from image2sim import Act
+
+# -----------------------------------------------------------------------------
+# 1. Initialize Image2Sim
+# -----------------------------------------------------------------------------
+
+device = "cuda:0"
+config = SimpleNamespace(
+    image_height=512,
+    batch_size=1,
+    max_depth=10.0,
+    device=device,
+)
+
+neural_simulator = image2sim.NeuralSimulator(config)
+
+# Load pretrained Gaussian and pixel-flow models.
+neural_simulator = data_tools.load_checkpoint(neural_simulator, "pretrained_models")
+
+# Optional: compile neural simulator operators for faster inference.
+neural_simulator.torch_compile()
+
+# Inference mode.
+neural_simulator.eval()
+
+# -----------------------------------------------------------------------------
+# 2. Load dataset configuration
+# -----------------------------------------------------------------------------
+
+with open("scripts/dataset_config.json", "r") as f:
+    data_source = json.load(f)
+
+# HM3D is used here as an example.
+dataset_info = data_source["hm3d"]
+dataset_type = dataset_info[0]
+images_dir = dataset_info[1]
+scenes_dir = dataset_info[2]
+
+# Enumerate all scenes with navigable voxel maps.
+pcd_files = glob.glob(os.path.join(scenes_dir, "*_navigable.pcd"))
+scene_names = [os.path.basename(f).replace("_navigable.pcd", "") for f in pcd_files]
+scene_names.sort()
+
+scene_name = scene_names[0]
+scene_path = os.path.join(images_dir, scene_name)
+full_pcd_path = os.path.join(scenes_dir, f"{scene_name}.pcd")
+nav_pcd_path = os.path.join(scenes_dir, f"{scene_name}_navigable.pcd")
+
+# Optional: denoised panoramic structure point cloud.
+scene_pcd = None
+# scene_pcd = o3d.io.read_point_cloud(full_pcd_path)
+
+# Navigable voxels for motion simulation.
+nav_pcd = o3d.io.read_point_cloud(nav_pcd_path)
+
+# -----------------------------------------------------------------------------
+# 3. Build and import full-scene feature Gaussians
+# -----------------------------------------------------------------------------
+
+scene_xyz, scene_rgb, scene_feats, scene_gs, all_frames_data = data_tools.build_scene_pointcloud_data(
+    scene_path,
+    dataset_type=dataset_type,
+    device=device,
+    voxel_size=0.005,        # Voxel downsampling size for Gaussian construction.
+    model=neural_simulator,
+    max_batch_size=1000,     # Maximum number of images used to construct the scene.
+    inpaint_depth=True,      # Pre-complete missing depth inputs.
+)
+
+neural_simulator.import_scene_gaussian(
+    xyz=scene_xyz,
+    rgb=scene_rgb,
+    feats=scene_feats,
+    gs_attrs=scene_gs,
+)
+
+# Load navigable voxels and the optional structural point cloud for denoising.
+neural_simulator.load_navigable_pcd(nav_pcd, scene_pcd)
+
+
+# Close-loop control and visualization
+def vis_obs(obs, max_depth=10.0):
+    rgb = obs["rgb"][0].detach().cpu().numpy()                       # [H, W, 3], RGB, uint8
+    depth = obs["depth"][0].detach().cpu().numpy()                   # [H, W], metric depth
+
+    bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+    depth_u8 = (255 * (1.0 - np.clip(depth / max_depth, 0, 1))).astype(np.uint8)
+    depth_vis = cv2.applyColorMap(depth_u8, cv2.COLORMAP_TURBO)
+
+    return np.concatenate([bgr, depth_vis], axis=1)
+
+gui = bool(os.environ.get("DISPLAY"))
+obs = sim.reset_agents() if hasattr(sim, "reset_agents") else sim._render_current_view()
+
+action_map = {
+    ord("w"): Action.MOVE_FORWARD,
+    ord("a"): Action.TURN_LEFT,
+    ord("d"): Action.TURN_RIGHT,
+}
+
+writer = None
+if not gui:
+    os.makedirs("demo_outputs", exist_ok=True)
+    frame = vis_obs(obs, sim.max_depth)
+    h, w = frame.shape[:2]
+    writer = cv2.VideoWriter(
+        "demo_outputs/headless_navigation.mp4",
+        cv2.VideoWriter_fourcc(*"mp4v"),
+        10,
+        (w, h),
+    )
+
+print("Controls: W=forward, A=turn left, D=turn right, Q=quit")
+
+while True:
+    frame = vis_obs(obs, sim.max_depth)
+
+    if gui:
+        cv2.imshow("Image2Sim Navigation Demo: RGB | Depth", frame)
+        key = cv2.waitKey(0) & 0xFF
+    else:
+        writer.write(frame)
+        key = ord(input("Action [w/a/d/q]: ").strip().lower()[:1] or "q")
+
+    if key == ord("q"):
+        break
+
+    if key in action_map:
+        obs, info = sim.step([action_map[key]], render_observation=True)
+        print(
+            "pos=", info["position"][0].detach().cpu().numpy(),
+            "heading=", float(info["heading"][0].detach().cpu()),
+            "collided=", bool(info["collided"][0].detach().cpu()),
+        )
+
+if writer is not None:
+    writer.release()
+if gui:
+    cv2.destroyAllWindows()
+```
+
+## Training and Evaluation
+
+### Train the feature 3DGS encoder and neural renderer
+
+```bash
+bash scripts/3dgs_train.sh
+```
+
+### Evaluate neural rendering quality
+
+A lightweight reference implementation is provided:
+
+```bash
+python3 3dgs_eval.py
+```
+
+### Train Image2Nav navigation model
+
+Stage 1: behavior cloning.
+
+```bash
+bash scripts/vln_train.sh
+```
+
+Stage 2: online DAgger training.
+
+```bash
+bash scripts/vln_train_dagger.sh
+```
+
+### Generate navigation data
+
+```bash
+python3 nav_data_generation.py
+```
+
+
+
+## Data Process Tools
+
+Image2Sim provides utilities for building simulator-ready data.
+
+### Convert Habitat-compatible scenes
+
+```bash
+python3 data_processor/get_mp3d_scene_data.py
+python3 data_processor/get_hm3d_scene_data.py
+python3 data_processor/get_gibson_scene_data.py
+```
+
+### Convert image or video datasets
+
+```bash
+python3 data_processor/get_image_video_scene_data.py
+```
+
+### Convert Habitat VLN annotations to Image2Sim
+
+```bash
+python3 data_processor/convert_vln_from_habitat_to_image2sim.py
+```
+
+### Convert data from D3D-VLP
+
+Some [D3D-VLP](https://arxiv.org/abs/2512.12622) data can also be converted into the Image2Sim simulator format. 
+
+```bash
+python3 data_processor/convert_d3d_vlp_to_image2sim.py
+```
+
+## Importing Custom Image or Video Data
+
+Image2Sim can be used with third-party multi-view image or video data.
+
+Recommended preprocessing workflow:
+
+1. Use external 3D reconstruction or geometry-estimation tools, such as [VGGT Omega](https://github.com/facebookresearch/vggt-omega), [Lingbot-Map](https://github.com/robbyant/lingbot-map) or [Argus](https://github.com/realsee-developer/Argus) to estimate depth maps, camera poses, and intrinsics for pinhole or panoramic images.
+2. Convert the data into a format compatible with `data_tools.py`, following existing scene formats such as `hm3d_360` or `ScanNet`.
+3. Place converted scene data under:
+
+```text
+data/scene_datasets/
+```
+
+4. Run the image/video scene processor to build scene geometry:
+
+```bash
+python3 data_processor/get_image_video_scene_data.py
+```
+
+5. Store generated navigation maps under:
+
+```text
+data/nav_map/
+```
+
+External 3D reconstruction systems are not integrated into this repository because of license constraints and engineering complexity.
+
+
+
+## Habitat Evaluation Setup
+
+Image2Sim-trained navigation models can be evaluated in the Habitat simulator for cross-simulator evaluation.
+
+### Install Habitat
+
+```bash
+conda create -n habitat python=3.9 cmake=3.14.0 -y
+conda activate habitat
+conda install habitat-sim=0.3.3 withbullet headless -c conda-forge -c aihabitat
+
+git clone --branch v0.3.3 https://github.com/facebookresearch/habitat-lab.git
+cd habitat-lab
+pip install -e habitat-lab
+pip install -e habitat-baselines
+```
+
+### Download Habitat evaluation data
+
+Place evaluation data under:
+
+```text
+data/datasets/
+data/scene_datasets/
+```
+
+| Data        | Target path                 | Link                                                                                                                  |
+| ----------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| MP3D scenes | `data/scene_datasets/mp3d/` | [Official Matterport3D project page](https://niessner.github.io/Matterport)                                           |
+| R2R-CE      | `data/datasets/r2r/`        | [r2r-ce](https://drive.google.com/file/d/18DCrNcpxESnps1IbXVjXSbGLDzcSOqzD/view), rename `R2R_VLNCE_v1-3` to `r2r`    |
+| RxR-CE      | `data/datasets/rxr/`        | [rxr-ce](https://drive.google.com/file/d/145xzLjxBaNTbVgBfQ8e9EsBAV8W-SM0t/view), rename `RxR_VLNCE_v0` to `rxr`      |
+| REVERIE-CE  | `data/datasets/reverie/`    | [reverie-ce]( https://huggingface.co/datasets/MrZihanWang/Image2Sim-V1/tree/main/data/datasets), extract to `reverie` |
+
+### Evaluate Navigation Performance
+
+Use different config file at `vln/config` to evaluate on different datasets
+
+```bash
+bash scripts/vln_eval.sh
+```
+
+
+
+## Expected Directory Structure
+
+A typical Image2Sim working directory should look like this:
+
+```text
+Image2Sim/
+├── pretrained_models/
+│   │── image2sim_iter_xxxxx.pth # Pre-trained model for pixelflow render
+│   ├── models--Qwen--Qwen3-VL-4B-Instruct/
+│   ├── models--Qwen--Qwen3-VL-32B-Instruct/
+│   └── * # Other pre-trained weights
+├── data/
+│   ├── scene_datasets/ # RGBD data for scene reconstruction
+│   ├── nav_map/  # Scene geometry map
+│   ├── nav_data/ # Navigation training data
+│   └── datasets/ # optional, dataset for Habitat navigation evaluation
+├── data_processor/
+├── diff-gaussian-pano-rasterization-feature/
+├── dinov3/
+├── habitat_extensions/ # optional, some tools for Habitat navigation evaluation
+├── vln/ # Navigation model, training and evaluation code
+├── scripts/
+│   ├── dataset_config.json
+│   ├── 3dgs_train.sh
+│   ├── vln_train.sh
+│   ├── vln_train_dagger.sh
+│   └── vln_eval.sh
+├── data_tools.py
+├── image2sim.py
+├── nav_data_generation.py
+└── 3dgs_train.py
+└── 3dgs_eval.py
+```
+
+
+
+## Citation
+
+If you find Image2Sim useful for your research, please cite the project:
+
+```bibtex
+@misc{wang2026image2sim,
+  title  = {Image2Sim: Scaling Embodied Navigation via Generative Neural Simulator},
+  author = {Wang, Zihan and Lee, Seungjun and Xu, Yinghao and Lee, Gim Hee},
+  year   = {2026},
+  note   = {GitHub repository: https://github.com/MrZihan/Image2Sim}
+}
+```
 
 ## License
 
-Image2Sim is released under a layered license.
+Image2Sim uses a layered license:
 
-The source code is released under the Apache License, Version 2.0.
+- **Source code:** Apache License 2.0.
+- **Generated data and non-code research artifacts:** Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0), unless otherwise specified.
+- **Third-party-derived data and models:** subject to the original dataset, model, and software licenses, terms of use, and access restrictions.
 
-The generated data, including generated navigation episodes, instructions, annotations, metadata, model checkpoints, and other non-code research artifacts, is released under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0), unless otherwise specified.
+Users must separately obtain access to any required third-party datasets, pretrained models, and external software, and must comply with their original terms. This repository does not grant additional rights to third-party assets, scans, images, meshes, panoramas, semantic annotations, pretrained models, or other external materials.
 
-Data derived from third-party scene datasets remains subject to the original dataset licenses, terms of use, and access restrictions. Users must separately obtain access to the corresponding third-party datasets where required and must comply with their original terms. This project does not grant any rights to third-party materials beyond those granted by their respective owners.
+For full details, see:
+
+- [`LICENSE`](https://github.com/MrZihan/Image2Sim/blob/main/LICENSE)
+- [`LICENSE_NOTICE.MD`](https://github.com/MrZihan/Image2Sim/blob/main/LICENSE_NOTICE.MD)
 
 Copyright 2026 National University of Singapore (NUS).
-
-For details, please see [`LICENSE`](https://github.com/MrZihan/Image2Sim/blob/main/LICENSE) and [`LICENSE_NOTICE.MD`](https://github.com/MrZihan/Image2Sim/blob/main/LICENSE_NOTICE.MD).
