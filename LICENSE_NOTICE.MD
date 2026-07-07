@@ -52,6 +52,7 @@ Relevant third-party terms include:
 - RxR-CE: https://github.com/google-research-datasets/RxR
 - REVERIE: https://github.com/YuankaiQi/REVERIE
 - SRDF: https://github.com/wz0919/VLN-SRDF
+- D3D-VLP: https://github.com/MrZihan/D3D-VLP
 
 ## 4. Clean Demo Data
 
