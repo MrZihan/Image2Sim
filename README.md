@@ -28,7 +28,7 @@ Image2Sim is designed to support three main workflows:
 - [Overview](#overview)
 - [Installation](#installation)
 - [Data and Checkpoints](#data-and-checkpoints)
-- [Quick Start with an interactive demo](#quick-start)
+- [Quick Start with Interactive Demo](#quick-start)
 - [Training and Evaluation](#training-and-evaluation)
 - [Data Process Tools](#data-conversion-tools)
 - [Importing Custom Image or Video Data](#importing-custom-image-or-video-data)
@@ -148,7 +148,7 @@ Make sure the dataset paths are correctly configured in:
 scripts/dataset_config.json
 ```
 
-## Quick Start with an interactive demo
+## Quick Start with Interactive Demo
 
 The minimal Image2Sim simulator interface requires the following files or directories to be available in your project path:
 
