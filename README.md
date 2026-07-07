@@ -11,6 +11,10 @@
 
 ## Overview
 
+<p align="center">
+  <img src="framework.png" width="80%">
+</p>
+
 Embodied navigation requires agents to interpret multimodal goals, reason over 3D space, and execute reliable actions in complex real-world environments. A major bottleneck is the lack of scalable, high-fidelity, and interactive simulation environments that can support large-scale training while preserving realistic visual observations and physical motion.
 
 **Image2Sim** is a real-time neural simulation framework that builds interactive embodied navigation environments from posed RGB-D image sequences. The core idea is to decouple **3D spatial anchoring** from **photorealistic observation synthesis**: the simulator maintains an explicit 3D feature-Gaussian scene representation for geometry-aware navigation and uses a neural renderer with pixel-flow refinement to synthesize high-quality panoramic RGB-D observations.
@@ -21,10 +25,6 @@ Image2Sim is designed to support three main workflows:
 2. **Automated embodied data generation** with executable navigation actions and diverse language instructions.
 3. **Navigation model training**, including behavior cloning and online DAgger training.
    
-   
-<p align="center">
-  <img src="framework.png" width="80%">
-</p>
 
 ## Table of Contents
 
