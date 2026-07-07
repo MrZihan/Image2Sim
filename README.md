@@ -26,6 +26,25 @@ Image2Sim is designed to support three main workflows:
 3. **Navigation model training**, including behavior cloning and online DAgger training.
    
 
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <video src="https://github.com/MrZihan/Image2Sim/blob/main/examples/rgbd_demo.mp4"
+             autoplay muted loop playsinline controls width="100%">
+      </video>
+      <br>
+      <b>Real-time panoramic RGB-D rendering</b>
+    </td>
+    <td width="50%" align="center">
+      <video src="https://github.com/MrZihan/Image2Sim/blob/main/examples/denoise_demo.mp4"
+             autoplay muted loop playsinline controls width="100%">
+      </video>
+      <br>
+      <b>Interactive embodied navigation</b>
+    </td>
+  </tr>
+</table>
+
 ## Table of Contents
 
 - [Overview](#overview)
