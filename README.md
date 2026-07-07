@@ -12,7 +12,7 @@
 ## Overview
 
 <p align="center">
-  <img src="framework.png" width="80%">
+  <img src="examples/framework.png" width="80%">
 </p>
 
 Embodied navigation requires agents to interpret multimodal goals, reason over 3D space, and execute reliable actions in complex real-world environments. A major bottleneck is the lack of scalable, high-fidelity, and interactive simulation environments that can support large-scale training while preserving realistic visual observations and physical motion.
