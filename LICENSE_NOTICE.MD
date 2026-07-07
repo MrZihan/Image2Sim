@@ -48,6 +48,10 @@ Relevant third-party terms include:
 - Qwen3-VL License and Repository: https://github.com/QwenLM/Qwen3-VL
 - YOLO-World License: https://github.com/AILab-CVC/YOLO-World/blob/master/LICENSE
 - LPIPS / PerceptualSimilarity License: https://github.com/richzhang/PerceptualSimilarity/blob/master/LICENSE
+- R2R-CE: https://github.com/jacobkrantz/VLN-CE
+- RxR-CE: https://github.com/google-research-datasets/RxR
+- REVERIE: https://github.com/YuankaiQi/REVERIE
+- SRDF: https://github.com/wz0919/VLN-SRDF
 
 ## 4. Clean Demo Data
 
