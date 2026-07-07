@@ -220,7 +220,7 @@ scene_path = os.path.join(images_dir, scene_name)
 full_pcd_path = os.path.join(scenes_dir, f"{scene_name}.pcd")
 nav_pcd_path = os.path.join(scenes_dir, f"{scene_name}_navigable.pcd")
 
-# Optional: denoised panoramic structure point cloud.
+# Optional: denoised structure point cloud.
 scene_pcd = None
 # scene_pcd = o3d.io.read_point_cloud(full_pcd_path)
 
