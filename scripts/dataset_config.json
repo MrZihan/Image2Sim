@@ -1,0 +1,50 @@
+{
+  "realsee_synthetic": {
+    "dataset_type": "realsee",
+    "traj_dir": "data/nav_data",
+    "images_dir": "data/scene_datasets/RealSee3D/synthetic_data",
+    "scenes_dir": "data/nav_map/RealSee3D_synthetic"
+  },
+  "realsee_real": {
+    "dataset_type": "realsee",
+    "traj_dir": "data/nav_data",
+    "images_dir": "data/scene_datasets/RealSee3D/real_world_data",
+    "scenes_dir": "data/nav_map/RealSee3D_real"
+  },
+  "structured3d": {
+    "dataset_type": "structured3d",
+    "traj_dir": "data/nav_data",
+    "images_dir": "data/scene_datasets/Structured3D/Structured3D",
+    "scenes_dir": "data/nav_map/Structured3D"
+  },
+  "matterport": {
+    "dataset_type": "matterport",
+    "traj_dir": "data/nav_data",
+    "images_dir": "data/scene_datasets/Matterport3D_360/data",
+    "scenes_dir": "data/nav_map/mp3d"
+  },
+  "hm3d": {
+    "dataset_type": "hm3d",
+    "traj_dir": "data/nav_data",
+    "images_dir": "data/scene_datasets/hm3d_360/hm3d_360",
+    "scenes_dir": "data/nav_map/hm3d"
+  },
+  "gibson": {
+    "dataset_type": "gibson",
+    "traj_dir": "data/nav_data",
+    "images_dir": "data/scene_datasets/gibson_360/gibson_360",
+    "scenes_dir": "data/nav_map/gibson"
+  },
+  "scannet": {
+    "dataset_type": "scannet",
+    "traj_dir": "data/nav_data",
+    "images_dir": "data/scene_datasets/scannet/frames_square",
+    "scenes_dir": "data/nav_map/ScanNet"
+  },
+  "arkitscenes": {
+    "dataset_type": "arkitscenes",
+    "traj_dir": "data/nav_data",
+    "images_dir": "data/scene_datasets/arkitscenes/Training",
+    "scenes_dir": "data/nav_map/ARKitScenes"
+  }
+}

@@ -1,0 +1,54 @@
+defaults:
+  - /habitat: habitat_config_base
+  - /habitat/task: vln_r2r
+  - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
+  - /habitat/dataset/vln: 
+  - /habitat/task/lab_sensors:
+    - gps_sensor
+    - compass_sensor
+  - _self_
+
+habitat:
+  environment:
+    max_episode_steps: 300
+
+  simulator:
+    forward_step_size: 0.25
+    turn_angle: 15
+    habitat_sim_v0:
+      gpu_device_id: 0
+      allow_sliding: True
+      
+    agents:
+      main_agent:
+        sim_sensors:
+          rgb_sensor:
+            width: 336
+            height: 336
+            hfov: 90
+          depth_sensor:
+            width: 336
+            height: 336
+            hfov: 90
+
+  task:
+    type: VLN-v0
+    measurements:
+      distance_to_goal:
+        type: DistanceToGoal
+        distance_to: POINT
+      success:
+        type: Success
+        success_distance: 3.0
+      spl:
+        type: SPL
+      oracle_success:
+        type: OracleSuccess
+      ndtw:
+        type: NDTW
+        
+  dataset:
+    type: RxRVLN-v1
+    split: val_unseen
+    data_path: data/datasets/rxr/{split}/{split}_{role}.json.gz
+    scenes_dir: data/scene_datasets/
