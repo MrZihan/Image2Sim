@@ -148,7 +148,7 @@ Make sure the dataset paths are correctly configured in:
 scripts/dataset_config.json
 ```
 
-## Quick Start
+## Quick Start with an interactive demo
 
 The minimal Image2Sim simulator interface requires the following files or directories to be available in your project path:
 
