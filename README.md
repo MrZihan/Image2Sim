@@ -13,4 +13,4 @@ Data derived from third-party scene datasets remains subject to the original dat
 
 Copyright 2026 National University of Singapore (NUS).
 
-For details, please see `LICENSE` and `LICENSE_NOTICE.md`.
+For details, please see [`LICENSE`](https://github.com/MrZihan/Image2Sim/blob/main/LICENSE) and [`LICENSE_NOTICE.md`](https://github.com/MrZihan/Image2Sim/blob/main/LICENSE_NOTICE.md).
