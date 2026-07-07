@@ -9,10 +9,6 @@
 
 **Authors:** Zihan Wang, Seungjun Lee, Yinghao Xu, Gim Hee Lee 
 
-<p align="center">
-  <img src="framework.png" width="95%">
-</p>
-
 ## Overview
 
 Embodied navigation requires agents to interpret multimodal goals, reason over 3D space, and execute reliable actions in complex real-world environments. A major bottleneck is the lack of scalable, high-fidelity, and interactive simulation environments that can support large-scale training while preserving realistic visual observations and physical motion.
@@ -26,6 +22,9 @@ Image2Sim is designed to support three main workflows:
 3. **Navigation model training**, including behavior cloning and online DAgger training.
    
    
+<p align="center">
+  <img src="framework.png" width="80%">
+</p>
 
 ## Table of Contents
 
