@@ -167,12 +167,13 @@ import json
 import os
 from types import SimpleNamespace
 import open3d as o3d
+import torch
 import data_tools
 import image2sim
 import cv2
 import numpy as np
-from image2sim import Act
-
+from image2sim import Action
+from torch.cuda.amp import autocast
 # -----------------------------------------------------------------------------
 # 1. Initialize Image2Sim
 # -----------------------------------------------------------------------------
@@ -190,7 +191,7 @@ neural_simulator = image2sim.NeuralSimulator(config)
 # Load pretrained Gaussian and pixel-flow models.
 neural_simulator = data_tools.load_checkpoint(neural_simulator, "pretrained_models")
 
-# Optional: compile neural simulator operators for faster inference.
+# Optional: compile neural simulator for faster inference.
 neural_simulator.torch_compile()
 
 # Inference mode.
@@ -203,11 +204,11 @@ neural_simulator.eval()
 with open("scripts/dataset_config.json", "r") as f:
     data_source = json.load(f)
 
-# HM3D is used here as an example.
+# One scene of HM3D is used here as an example.
 dataset_info = data_source["hm3d"]
-dataset_type = dataset_info[0]
-images_dir = dataset_info[1]
-scenes_dir = dataset_info[2]
+dataset_type = dataset_info['dataset_type']
+images_dir = dataset_info['images_dir']
+scenes_dir = dataset_info['scenes_dir']
 
 # Enumerate all scenes with navigable voxel maps.
 pcd_files = glob.glob(os.path.join(scenes_dir, "*_navigable.pcd"))
@@ -230,86 +231,97 @@ nav_pcd = o3d.io.read_point_cloud(nav_pcd_path)
 # 3. Build and import full-scene feature Gaussians
 # -----------------------------------------------------------------------------
 
-scene_xyz, scene_rgb, scene_feats, scene_gs, all_frames_data = data_tools.build_scene_pointcloud_data(
-    scene_path,
-    dataset_type=dataset_type,
-    device=device,
-    voxel_size=0.005,        # Voxel downsampling size for Gaussian construction.
-    model=neural_simulator,
-    max_batch_size=1000,     # Maximum number of images used to construct the scene.
-    inpaint_depth=True,      # Pre-complete missing depth inputs.
-)
+with torch.amp.autocast(device_type='cuda'):
+  with torch.no_grad():
+    scene_xyz, scene_rgb, scene_feats, scene_gs, all_frames_data = data_tools.build_scene_pointcloud_data(
+        scene_path,
+        dataset_type=dataset_type,
+        device=device,
+        voxel_size=0.005,        # Voxel downsampling size for Gaussian construction.
+        model=neural_simulator,
+        max_batch_size=1000,     # Maximum number of images used to construct the scene.
+        inpaint_depth=True,      # Pre-complete missing depth inputs.
+    )
+    
+    neural_simulator.import_scene_gaussian(
+        xyz=scene_xyz,
+        rgb=scene_rgb,
+        feats=scene_feats,
+        gs_attrs=scene_gs,
+    )
+    
+    # Load navigable voxels and the optional structural point cloud for denoising.
+    neural_simulator.load_navigable_pcd(nav_pcd, scene_pcd)
 
-neural_simulator.import_scene_gaussian(
-    xyz=scene_xyz,
-    rgb=scene_rgb,
-    feats=scene_feats,
-    gs_attrs=scene_gs,
-)
+# Select a start position 
+nav_points = np.asarray(nav_pcd.points)
+center = nav_points.mean(axis=0)
+start = nav_points[np.argmin(np.linalg.norm(nav_points - center, axis=1))]
 
-# Load navigable voxels and the optional structural point cloud for denoising.
-neural_simulator.load_navigable_pcd(nav_pcd, scene_pcd)
+start_pos = torch.tensor(
+    start, device=device, dtype=torch.float32
+).view(1, 3)
 
+start_heading = torch.rand(
+    1, device=device, dtype=torch.float32
+) * 2 * np.pi
+neural_simulator.reset_agents(start_pos, start_heading)
 
-# Close-loop control and visualization
-def vis_obs(obs, max_depth=10.0):
-    rgb = obs["rgb"][0].detach().cpu().numpy()                       # [H, W, 3], RGB, uint8
-    depth = obs["depth"][0].detach().cpu().numpy()                   # [H, W], metric depth
+# -----------------------------------------------------------------------------
+# 4. Interactive panorama RGB-D demo
+# -----------------------------------------------------------------------------
 
-    bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-    depth_u8 = (255 * (1.0 - np.clip(depth / max_depth, 0, 1))).astype(np.uint8)
-    depth_vis = cv2.applyColorMap(depth_u8, cv2.COLORMAP_TURBO)
+def render():
+    return neural_simulator.get_panorama_observation(
+        neural_simulator.agent_pos,
+        neural_simulator.agent_heading
+    )
 
-    return np.concatenate([bgr, depth_vis], axis=1)
+def vis(rgb, depth, scale=1.0):
+    rgb = rgb[0].detach().cpu().numpy()
+    depth = depth[0].detach().cpu().numpy()
+    depth = (255 * (1 - np.clip(depth / neural_simulator.max_depth, 0, 1))).astype(np.uint8)
+    depth = cv2.applyColorMap(depth, cv2.COLORMAP_TURBO)
+    rgb = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+    frame = np.vstack([rgb, depth])   # RGB top, depth bottom
+    if scale != 1.0:
+        h, w = frame.shape[:2]
+        frame = cv2.resize(frame, (int(w * scale), int(h * scale)))
 
-gui = bool(os.environ.get("DISPLAY"))
-obs = sim.reset_agents() if hasattr(sim, "reset_agents") else sim._render_current_view()
+    return frame
 
-action_map = {
+action = {
     ord("w"): Action.MOVE_FORWARD,
     ord("a"): Action.TURN_LEFT,
     ord("d"): Action.TURN_RIGHT,
 }
 
-writer = None
-if not gui:
-    os.makedirs("demo_outputs", exist_ok=True)
-    frame = vis_obs(obs, sim.max_depth)
-    h, w = frame.shape[:2]
-    writer = cv2.VideoWriter(
-        "demo_outputs/headless_navigation.mp4",
-        cv2.VideoWriter_fourcc(*"mp4v"),
-        10,
-        (w, h),
-    )
 
-print("Controls: W=forward, A=turn left, D=turn right, Q=quit")
+with torch.amp.autocast(device_type='cuda'):
+  with torch.no_grad():
+        print("Click the visualization window first, then use keyboard controls: W=forward, A=left, D=right, Q=quit.")
+        rgb, depth = render()
+        while True:
+            cv2.imshow("Image2Sim Panorama: RGB | Depth", vis(rgb, depth))
+            key = cv2.waitKey(10) & 0xFF
 
-while True:
-    frame = vis_obs(obs, sim.max_depth)
+            if key == 255:
+                continue
+            if 65 <= key <= 90:
+                key += 32
+            if key == ord("q"):
+                break
 
-    if gui:
-        cv2.imshow("Image2Sim Navigation Demo: RGB | Depth", frame)
-        key = cv2.waitKey(0) & 0xFF
-    else:
-        writer.write(frame)
-        key = ord(input("Action [w/a/d/q]: ").strip().lower()[:1] or "q")
-
-    if key == ord("q"):
-        break
-
-    if key in action_map:
-        obs, info = sim.step([action_map[key]], render_observation=True)
-        print(
-            "pos=", info["position"][0].detach().cpu().numpy(),
-            "heading=", float(info["heading"][0].detach().cpu()),
-            "collided=", bool(info["collided"][0].detach().cpu()),
+            if key in action:
+                _, info = neural_simulator.step([action[key]], render_observation=False)
+                rgb, depth = render()
+                print(
+                    "pos=", info["position"][0].detach().cpu().numpy(),
+                    "heading=", float(info["heading"][0].detach().cpu()),
+                    "collided=", bool(info["collided"][0].detach().cpu()),
         )
 
-if writer is not None:
-    writer.release()
-if gui:
-    cv2.destroyAllWindows()
+cv2.destroyAllWindows()
 ```
 
 ## Training and Evaluation
