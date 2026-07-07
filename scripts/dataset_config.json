@@ -26,13 +26,13 @@
   "hm3d": {
     "dataset_type": "hm3d",
     "traj_dir": "data/nav_data",
-    "images_dir": "data/scene_datasets/hm3d_360/hm3d_360",
+    "images_dir": "data/scene_datasets/hm3d_360",
     "scenes_dir": "data/nav_map/hm3d"
   },
   "gibson": {
     "dataset_type": "gibson",
     "traj_dir": "data/nav_data",
-    "images_dir": "data/scene_datasets/gibson_360/gibson_360",
+    "images_dir": "data/scene_datasets/gibson_360",
     "scenes_dir": "data/nav_map/gibson"
   },
   "scannet": {
