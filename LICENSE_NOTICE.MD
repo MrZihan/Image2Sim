@@ -27,13 +27,27 @@ The Image2Sim source code, including implementation files, scripts, configuratio
 
 The Apache-2.0 license applies only to source code and code-like materials. It does not override the separate terms that apply to generated data, model checkpoints, third-party datasets, or third-party assets.
 
-## 3. Third-Party-Derived Data
+## 3. Third-Party-Derived Data and Models
 
-Some Image2Sim data may be derived from, reference, or require access to third-party scene datasets, simulators, pretrained models, software libraries, or other external resources.
+Some Image2Sim components and data may be derived from, reference, or require access to third-party scene datasets, simulators, pretrained models, software libraries, or other external resources.
 
-Data derived from third-party scene datasets remains subject to the original dataset licenses, terms of use, and access restrictions. Users must separately obtain access to the corresponding third-party datasets where required and must comply with the original terms of those datasets.
+Data and components derived from third-party scene datasets and pre-trained models remain subject to the original licenses, terms of use, and access restrictions. Users must separately obtain access to the corresponding third-party datasets, models and software where required and must comply with the original terms.
 
 This project does not grant any rights to third-party datasets, assets, scans, images, meshes, panoramas, semantic annotations, simulator assets, pretrained models, or other external materials beyond those granted by their respective owners.
+
+Relevant third-party terms include:
+
+- Matterport3D Terms of Use: https://kaldir.vc.in.tum.de/matterport/MP_TOS.pdf
+- Structured3D Terms of Use: https://drive.google.com/file/d/13ZwWpU_557ZQccwOUJ8H5lvXD7MeZFMa/view
+- RealSee3D Dataset Agreement: https://github.com/realsee-developer/RealSee3D/blob/main/docs/Realsee3D_Dataset_agreement.pdf
+- HM3D / Matterport Academic Use Model Data Agreement: https://matterport.com/legal/matterport-end-user-license-agreement-academic-use-model-data
+- Gibson Database of Spaces Agreement: https://svl.stanford.edu/gibson2/assets/GDS_agreement.pdf
+- ScanNet Terms of Use: https://kaldir.vc.cit.tum.de/scannet/ScanNet_TOS.pdf
+- ARKitScenes License: https://github.com/apple/ARKitScenes/blob/main/LICENSE
+- DINOv3 License: https://github.com/facebookresearch/dinov3/blob/main/LICENSE.md
+- Qwen3-VL License and Repository: https://github.com/QwenLM/Qwen3-VL
+- YOLO-World License: https://github.com/AILab-CVC/YOLO-World/blob/master/LICENSE
+- LPIPS / PerceptualSimilarity License: https://github.com/richzhang/PerceptualSimilarity/blob/master/LICENSE
 
 ## 4. Clean Demo Data
 
