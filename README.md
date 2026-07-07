@@ -3,6 +3,7 @@
 <p align="center">
   <a href="https://github.com/MrZihan/Image2Sim">Code</a> |
   <a href="https://huggingface.co/datasets/MrZihanWang/Image2Sim-V1">Data & Checkpoints</a> |
+  <a href="https://github.com/MrZihan/Image2Sim/blob/main/examples">Demo Videos</a> |
   <a href="#citation">Citation</a> |
   <a href="#license">License</a>
 </p>
@@ -24,26 +25,6 @@ Image2Sim is designed to support three main workflows:
 1. **Neural scene simulation** from posed RGB-D images, panoramic captures, or reconstructed image/video data.
 2. **Automated embodied data generation** with executable navigation actions and diverse language instructions.
 3. **Navigation model training**, including behavior cloning and online DAgger training.
-   
-
-<table>
-  <tr>
-    <td width="50%" align="center">
-      <video src="https://github.com/MrZihan/Image2Sim/blob/main/examples/rgbd_demo.mp4"
-             autoplay muted loop playsinline controls width="100%">
-      </video>
-      <br>
-      <b>Real-time panoramic RGB-D rendering</b>
-    </td>
-    <td width="50%" align="center">
-      <video src="https://github.com/MrZihan/Image2Sim/blob/main/examples/denoise_demo.mp4"
-             autoplay muted loop playsinline controls width="100%">
-      </video>
-      <br>
-      <b>Interactive embodied navigation</b>
-    </td>
-  </tr>
-</table>
 
 ## Table of Contents
 
