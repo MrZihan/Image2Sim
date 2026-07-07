@@ -28,7 +28,7 @@ Image2Sim is designed to support three main workflows:
 - [Overview](#overview)
 - [Installation](#installation)
 - [Data and Checkpoints](#data-and-checkpoints)
-- [Quick Start](#quick-start)
+- [Quick Start with an interactive demo](#quick-start)
 - [Training and Evaluation](#training-and-evaluation)
 - [Data Process Tools](#data-conversion-tools)
 - [Importing Custom Image or Video Data](#importing-custom-image-or-video-data)
