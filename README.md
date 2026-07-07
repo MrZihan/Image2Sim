@@ -159,7 +159,7 @@ data_tools.py
 pretrained_models/
 ```
 
-The example below loads a pretrained simulator, builds feature Gaussians for one HM3D scene, imports navigable voxels，render observation and control the agent.
+The example shows how to initialize the simulator, build feature Gaussians for one scene, import navigable voxels, render observations, and control the agent.
 
 ```python
 import glob
