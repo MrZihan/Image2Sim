@@ -4,7 +4,6 @@
   <a href="https://arxiv.org/abs/2607.05765">Paper</a> |
   <a href="https://github.com/MrZihan/Image2Sim">Code</a> |
   <a href="https://huggingface.co/datasets/MrZihanWang/Image2Sim-V1/tree/main">Data & Checkpoints</a> |
-  <a href="https://github.com/MrZihan/Image2Sim/blob/main/examples">Demo Videos</a> |
   <a href="#citation">Citation</a> |
   <a href="#license">License</a>
 </p>
