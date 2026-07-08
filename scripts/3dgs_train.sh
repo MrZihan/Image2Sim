@@ -7,7 +7,7 @@ LOCAL_IP=$(ip addr show eth0 | grep -w inet | awk '{print $2}' | cut -d/ -f1)
 
 
 torchrun \
-  --nnodes=8 \
+  --nnodes=1 \
   --nproc_per_node=8 \
   --max_restarts=3 \
   --rdzv_id=0 \
