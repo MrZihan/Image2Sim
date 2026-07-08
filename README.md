@@ -35,7 +35,7 @@ Image2Sim is designed to support three main workflows:
 - [Quick Start with Interactive Demo](#quick-start-with-interactive-demo)
 - [Training and Evaluation](#training-and-evaluation)
 - [Data Process Tools](#data-process-tools)
-- [Importing Custom Image or Video Data](#importing-custom-image-or-video-data)
+- [Importing Custom Image or Video Data into Image2Sim](#importing-custom-image-or-video-data-into-image2sim)
 - [Navigation Evaluation in Habitat](#navigation-evaluation-in-habitat)
 - [Expected Directory Structure](#expected-directory-structure)
 - [Citation](#citation)
