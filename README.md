@@ -30,18 +30,18 @@ Image2Sim is designed to support three main workflows:
 <table>
   <tr>
     <td width="50%" align="center">
-      <video src="https://github.com/MrZihan/Image2Sim/blob/main/examples/denoise_demo.mp4"
+      <video src="https://raw.githubusercontent.com/MrZihan/Image2Sim/main/examples/denoise_demo.mp4"
              autoplay muted loop playsinline controls width="100%">
       </video>
       <br>
-      <b>Comparison between Gaussian Splatting and Pixel Flow rendering in a high-noise sparse scene</b>
+      <b>Comparison between Gaussian Splatting and Pixel Flow rendering in a high-noise sparse scene.</b>
     </td>
     <td width="50%" align="center">
-      <video src="https://github.com/MrZihan/Image2Sim/blob/main/examples/rgbd_demo.mp4"
+      <video src="https://raw.githubusercontent.com/MrZihan/Image2Sim/main/examples/rgbd_demo.mp4"
              autoplay muted loop playsinline controls width="100%">
       </video>
       <br>
-      <b>Visualization of Motion Simulation and RGB-D rendering.</b>
+      <b>Visualization of motion simulation and RGB-D rendering.</b>
     </td>
   </tr>
 </table>
