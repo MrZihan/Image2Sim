@@ -17,7 +17,7 @@
   <img src="examples/framework.png" width="80%">
 </p>
 
-Embodied navigation requires agents to interpret multimodal goals, reason over 3D space, and execute reliable actions in complex real-world environments. A major bottleneck is the lack of scalable, high-fidelity, and interactive simulation environments that can support large-scale training while preserving realistic visual observations and physical motion.
+Embodied navigation requires agents to interpret multimodal goals, reason over 3D space, and reliably move to the target in the real world. A major bottleneck is the lack of scalable, high-fidelity, and interactive 3D environments that can support large-scale training while preserving realistic visual observations and physical motion.
 
 **Image2Sim** is a real-time neural simulation framework that builds interactive embodied navigation environments from posed RGB-D image sequences. The core idea is to decouple **3D spatial anchoring** from **photorealistic observation synthesis**: the simulator maintains an explicit 3D feature-Gaussian scene representation for geometry-aware navigation and uses a neural renderer with pixel-flow refinement to synthesize high-quality panoramic RGB-D observations.
 
@@ -36,7 +36,7 @@ Image2Sim is designed to support three main workflows:
 - [Training and Evaluation](#training-and-evaluation)
 - [Data Process Tools](#data-process-tools)
 - [Importing Custom Image or Video Data](#importing-custom-image-or-video-data)
-- [Habitat Evaluation Setup](#habitat-evaluation-setup)
+- [Navigation Evaluation in Habitat](#navigation-evaluation-in-habitat)
 - [Expected Directory Structure](#expected-directory-structure)
 - [Citation](#citation)
 - [License](#license)
@@ -66,7 +66,7 @@ cd Image2Sim
 
 ### 3. Install the panoramic feature Gaussian splatting renderer
 
-Image2Sim uses a modified feature Gaussian splatting rasterizer for panoramic rendering and training.
+Image2Sim uses a modified [feature Gaussian splatting rasterizer](https://github.com/ShijieZhou-UCLA/feature-3dgs) for panoramic rendering and training.
 
 ```bash
 cd diff-gaussian-pano-rasterization-feature
@@ -142,11 +142,11 @@ data/scene_datasets/
 
 | Dataset      | Usage                                             | Link                                           |
 | ------------ | ------------------------------------------------- | ---------------------------------------------- |
-| RealSee3D    | Large-scale indoor scenes and RGB-D/panorama data | https://github.com/realsee-developer/RealSee3D |
-| Structured3D | Synthetic structured indoor scenes                | https://github.com/bertjiazheng/Structured3D   |
-| ARKitScenes  | Optional room-grounding navigation data           | https://github.com/apple/ARKitScenes           |
+| RealSee3D    | 10K Large-scale indoor scenes with panorama data | https://github.com/realsee-developer/RealSee3D |
+| Structured3D | 3.5K Synthetic structured indoor scenes                | https://github.com/bertjiazheng/Structured3D   |
+| ARKitScenes  | Optional, 4K+ room-level scene           | https://github.com/apple/ARKitScenes           |
 
-Make sure the dataset paths are correctly configured in:
+Make sure all dataset paths are correctly configured in:
 
 ```text
 scripts/dataset_config.json
@@ -161,9 +161,11 @@ dinov3/
 image2sim.py
 data_tools.py
 pretrained_models/
+scripts/dataset_config.json
 ```
 
 The example shows how to initialize the simulator, build feature Gaussians for one scene, import navigable voxels, render observations, and control the agent.
+Make sure your machine has a display available, or that your terminal session supports X11 forwarding for graphical visualization.
 
 ```python
 import glob
@@ -358,19 +360,19 @@ Stage 2: online DAgger training.
 bash scripts/vln_train_dagger.sh
 ```
 
-### Generate navigation data
-
-```bash
-python3 nav_data_generation.py
-```
-
 
 
 ## Data Process Tools
 
 Image2Sim provides utilities for building simulator-ready data.
 
-### Convert Habitat-compatible scenes
+### Generate navigation data
+
+```bash
+python3 nav_data_generation.py
+```
+
+### Convert Habitat-compatible scenes into Image2Sim
 
 ```bash
 python3 data_processor/get_mp3d_scene_data.py
@@ -378,19 +380,19 @@ python3 data_processor/get_hm3d_scene_data.py
 python3 data_processor/get_gibson_scene_data.py
 ```
 
-### Convert image or video datasets
+### Convert image or video datasets into Image2Sim
 
 ```bash
 python3 data_processor/get_image_video_scene_data.py
 ```
 
-### Convert Habitat VLN annotations to Image2Sim
+### Convert VLN annotations from habitat into Image2Sim
 
 ```bash
 python3 data_processor/convert_vln_from_habitat_to_image2sim.py
 ```
 
-### Convert data from D3D-VLP
+### Convert data from D3D-VLP into Image2Sim
 
 Some [D3D-VLP](https://arxiv.org/abs/2512.12622) data can also be converted into the Image2Sim simulator format. 
 
@@ -398,7 +400,7 @@ Some [D3D-VLP](https://arxiv.org/abs/2512.12622) data can also be converted into
 python3 data_processor/convert_d3d_vlp_to_image2sim.py
 ```
 
-## Importing Custom Image or Video Data
+## Importing Custom Image or Video Data into Image2Sim
 
 Image2Sim can be used with third-party multi-view image or video data.
 
@@ -428,7 +430,7 @@ External 3D reconstruction systems are not integrated into this repository becau
 
 
 
-## Habitat Evaluation Setup
+## Navigation Evaluation in Habitat
 
 Image2Sim-trained navigation models can be evaluated in the Habitat simulator for cross-simulator evaluation.
 
