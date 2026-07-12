@@ -533,11 +533,10 @@ If you find Image2Sim useful for your research, please cite the project:
 
 ```bibtex
 @article{wang2026image2sim,
-  title   = {Image2Sim: Scaling Embodied Navigation via Generative Neural Simulator},
-  author  = {Wang, Zihan and Lee, Seungjun and Xu, Yinghao and Lee, Gim Hee},
-  journal = {arXiv preprint arXiv:2607.05765},
-  year    = {2026},
-  url     = {https://arxiv.org/abs/2607.05765}
+  title={Image2Sim: Scaling Embodied Navigation via Generative Neural Simulator},
+  author={Wang, Zihan and Lee, Seungjun and Xu, Yinghao and Lee, Gim Hee},
+  journal={arXiv preprint arXiv:2607.05765},
+  year={2026}
 }
 ```
 
