@@ -119,10 +119,12 @@ pip install open3d huggingface_hub
 
 ### Image2Sim datasets and pretrained neural renderer
 
-Download the released Image2Sim data and pretrained models from:
+Download the released Image2Sim data and pretrained models:
 
 ```text
-https://huggingface.co/datasets/MrZihanWang/Image2Sim-V1
+pip install -U huggingface_hub
+hf auth login
+hf download MrZihanWang/Image2Sim-V1 --repo-type dataset --local-dir pretrained_models
 ```
 
 The neural renderer checkpoints should be placed under:
