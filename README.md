@@ -118,7 +118,6 @@ pip install open3d huggingface_hub
 ## Data and Checkpoints
 Hugging Face login
 ```text
-pip install -U huggingface_hub
 hf auth login
 ```
 
@@ -146,7 +145,6 @@ After downloading the dataset, unzip all `.zip` files in the corresponding direc
 Image2Sim uses Qwen3-VL models for navigation model initialization and instruction generation.
 
 ```bash
-pip install -U huggingface_hub
 hf auth login
 
 # For Image2Nav initialization
