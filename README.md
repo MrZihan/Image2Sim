@@ -116,21 +116,27 @@ pip install open3d huggingface_hub
 ## 
 
 ## Data and Checkpoints
-
-### Image2Sim datasets and pretrained neural renderer
-
-Download the released Image2Sim data and pretrained models:
-
+Hugging Face login
 ```text
 pip install -U huggingface_hub
 hf auth login
-hf download MrZihanWang/Image2Sim-V1 --repo-type dataset --local-dir pretrained_models
 ```
 
-The neural renderer checkpoints should be placed under:
+Download the pretrained models for Image2Sim (3D feature Gaussian encoder and neural render):
 
 ```text
-pretrained_models/
+hf download MrZihanWang/Image2Sim-V1 --include "pretrained_models/*" --repo-type dataset --local-dir ./
+```
+Download the checkpoints for Image2Nav (Embodied Navigation):
+
+```text
+hf download MrZihanWang/Image2Sim-V1 --include "checkpoint_pinhole_336x336_fov90/*" --repo-type dataset --local-dir ./  # Pinhole camera with 336x336 and 90° HFOV
+```
+
+Download the Image2Sim Datasets:
+
+```text
+hf download MrZihanWang/Image2Sim-V1 --include "data/*" --repo-type dataset --local-dir ./
 ```
 
 After downloading the dataset, unzip all `.zip` files in the corresponding directories.
