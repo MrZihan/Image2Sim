@@ -116,7 +116,10 @@ pip install open3d huggingface_hub
 ## 
 
 ## Data and Checkpoints
-Hugging Face login
+
+Submit access request for Image2Sim in [Hugging Face](https://huggingface.co/datasets/MrZihanWang/Image2Sim-V1/tree/main)
+
+Log in using the authorized Hugging Face account:
 ```text
 hf auth login
 ```
